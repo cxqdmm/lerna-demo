@@ -36,9 +36,9 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
-    "@types/node": "^20.0.0",
     "core-js": "^3.33.0",
     "eslint": "^8.45.0",
     "rollup": "^4.3.0",
@@ -51,5 +51,8 @@
     "ie >= 11",
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "dependencies": {
+    "perfume.js": "^9.4.0"
+  }
 }

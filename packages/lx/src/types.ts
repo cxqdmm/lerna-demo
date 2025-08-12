@@ -47,9 +47,10 @@ export interface APIData {
 
 // 资源加载事件数据
 export interface ResourceData {
-  url: string;
-  type: string;
-  duration: number;
-  size?: number;
-  status: 'success' | 'error';
+  name: string; // 资源名称/URL
+  type: string; // 资源类型
+  duration: number; // 加载时长
+  size?: number; // 资源大小
+  status: 'success' | 'failed' | 'loading' | 'timeout'; // 资源状态
+  timestamp: number; // 时间戳
 }

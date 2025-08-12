@@ -20,7 +20,7 @@ export class Tracker {
   // 安装插件
   use(plugin: Plugin): this {
     if (this.plugins.has(plugin.name)) {
-      console.warn(`⚠️ [LX Tracker] 插件 ${plugin.name} 已经安装过了`);
+      console.warn(`[LX Tracker] Plugin "${plugin.name}" already installed`);
       return this;
     }
     
@@ -28,11 +28,7 @@ export class Tracker {
     plugin.install(this);
     
     if (this.config.enableConsole) {
-      console.group(`🔌 [LX Tracker] 插件安装`);
-      console.log(`✅ 插件名称: ${plugin.name}`);
-      console.log(`📋 当前已安装插件:`, Array.from(this.plugins.keys()));
-      console.log(`⚙️ 插件总数: ${this.plugins.size}`);
-      console.groupEnd();
+      console.log(`[LX Tracker] Plugin installed: ${plugin.name} (${this.plugins.size} total)`);
     }
     
     return this;
@@ -48,15 +44,11 @@ export class Tracker {
       this.plugins.delete(pluginName);
       
       if (this.config.enableConsole) {
-        console.group(`🔌 [LX Tracker] 插件卸载`);
-        console.log(`❌ 已卸载插件: ${pluginName}`);
-        console.log(`📋 剩余已安装插件:`, Array.from(this.plugins.keys()));
-        console.log(`⚙️ 插件总数: ${this.plugins.size}`);
-        console.groupEnd();
+        console.log(`[LX Tracker] Plugin uninstalled: ${pluginName} (${this.plugins.size} remaining)`);
       }
     } else {
       if (this.config.enableConsole) {
-        console.warn(`⚠️ [LX Tracker] 插件 ${pluginName} 未找到，无法卸载`);
+        console.warn(`[LX Tracker] Plugin "${pluginName}" not found`);
       }
     }
     
@@ -87,21 +79,9 @@ export class Tracker {
     this.eventQueue.push(event);
     
     if (this.config.enableConsole) {
-      console.group(`🎯 [LX Tracker] ${type}`);
-      console.log('📊 事件详情:', {
-        类型: type,
-        时间戳: new Date(event.timestamp).toLocaleString(),
-        页面URL: event.url,
-        数据: event.data
-      });
-      console.log('📈 队列状态:', {
-        当前队列长度: this.eventQueue.length,
-        批量上报阈值: this.config.batchSize,
-        距离上报还需: (this.config.batchSize || 10) - this.eventQueue.length,
-        下次定时上报: `${Math.ceil((this.config.flushInterval || 5000) / 1000)}秒后`
-      });
-      console.log('🔧 已安装插件:', Array.from(this.plugins.keys()));
-      console.groupEnd();
+      const queueInfo = `${this.eventQueue.length}/${this.config.batchSize || 10}`;
+      console.log(`[LX Tracker] Event tracked: ${type} (queue: ${queueInfo})`);
+      console.log('Data:', event.data);
     }
 
     // 检查是否需要立即上报
@@ -114,7 +94,7 @@ export class Tracker {
   flush(): void {
     if (this.eventQueue.length === 0) {
       if (this.config.enableConsole) {
-        console.log('📤 [LX Tracker] 队列为空，无需上报');
+        console.log('[LX Tracker] Queue empty, nothing to flush');
       }
       return;
     }
@@ -122,15 +102,8 @@ export class Tracker {
     const events = this.eventQueue.splice(0);
     
     if (this.config.enableConsole) {
-      console.group('📤 [LX Tracker] 批量上报事件');
-      console.log(`📊 上报事件数量: ${events.length}`);
-      console.log('📋 事件列表:', events.map(e => ({
-        类型: e.type,
-        时间: new Date(e.timestamp).toLocaleString(),
-        数据大小: JSON.stringify(e.data).length + ' 字符'
-      })));
-      console.log(`🌐 上报地址: ${this.config.endpoint || '未配置'}`);
-      console.groupEnd();
+      const eventTypes = events.map(e => e.type).join(', ');
+      console.log(`[LX Tracker] Flushing ${events.length} events: [${eventTypes}]`);
     }
     
     this.send(events);
@@ -140,11 +113,7 @@ export class Tracker {
   private send(events: TrackEvent[]): void {
     if (!this.config.endpoint) {
       if (this.config.enableConsole) {
-        console.group('⚠️ [LX Tracker] 上报失败');
-        console.warn('❌ 未配置上报地址 (endpoint)');
-        console.log('📋 待上报事件:', events);
-        console.log('💡 提示: 请在初始化时配置 endpoint 参数');
-        console.groupEnd();
+        console.warn('[LX Tracker] No endpoint configured, events not sent');
       }
       return;
     }
@@ -152,19 +121,16 @@ export class Tracker {
     // 使用 sendBeacon 或 fetch 发送数据
     const data = JSON.stringify({ events });
     const dataSize = new Blob([data]).size;
+    const method = navigator.sendBeacon ? 'sendBeacon' : 'fetch';
     
     if (this.config.enableConsole) {
-      console.group('🚀 [LX Tracker] 发送数据');
-      console.log(`📦 数据大小: ${dataSize} 字节`);
-      console.log(`🔧 发送方式: ${navigator.sendBeacon ? 'sendBeacon' : 'fetch'}`);
-      console.log('📄 发送内容:', { events });
+      console.log(`[LX Tracker] Sending ${events.length} events (${dataSize}B) via ${method}`);
     }
     
     if (navigator.sendBeacon) {
       const success = navigator.sendBeacon(this.config.endpoint, data);
       if (this.config.enableConsole) {
-        console.log(`📡 sendBeacon 结果: ${success ? '✅ 成功' : '❌ 失败'}`);
-        console.groupEnd();
+        console.log(`[LX Tracker] Send result: ${success ? 'success' : 'failed'}`);
       }
     } else {
       fetch(this.config.endpoint, {
@@ -177,14 +143,12 @@ export class Tracker {
       })
       .then(response => {
         if (this.config.enableConsole) {
-          console.log(`📡 fetch 响应: ${response.status} ${response.statusText}`);
-          console.groupEnd();
+          console.log(`[LX Tracker] Send result: ${response.status} ${response.statusText}`);
         }
       })
       .catch(error => {
         if (this.config.enableConsole) {
-          console.error('❌ 发送失败:', error);
-          console.groupEnd();
+          console.error('[LX Tracker] Send failed:', error);
         }
       });
     }

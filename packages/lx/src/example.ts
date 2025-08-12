@@ -10,10 +10,10 @@ const tracker = new Tracker({
   sessionId: 'session456',
   extra: {
     appVersion: '1.0.0',
-    platform: 'web'
-  }
+    platform: 'web',
+  },
 });
-
+debugger;
 // 安装插件
 tracker
   .use(new JSErrorPlugin()) // JS错误监控
@@ -23,17 +23,17 @@ tracker
 // 手动埋点示例
 tracker.track('page-view', {
   page: '/home',
-  title: '首页'
+  title: '首页',
 });
 
 tracker.track('button-click', {
   buttonId: 'submit-btn',
-  buttonText: '提交'
+  buttonText: '提交',
 });
 
 tracker.track('user-action', {
   action: 'scroll',
-  position: 100
+  position: 100,
 });
 
 // 页面卸载时清理

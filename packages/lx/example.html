@@ -8,10 +8,11 @@
     />
     <title>LX 埋点SDK 示例</title>
 
-    <!-- CDN JavaScript 库用于测试资源加载 -->
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <!-- Perfume.js CDN 用于性能监控 -->
+    <script src="https://unpkg.com/perfume.js@8.4.0/dist/perfume.umd.min.js"></script>
+    <!-- 其他测试资源 -->
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.6.0/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.10/dayjs.min.js"></script>
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -82,22 +83,22 @@
       // 创建埋点实例
       const tracker = new LX.Tracker({
         endpoint: 'https://httpbin.org/post', // 使用httpbin作为测试接口
-        batchSize: 3, // 增加批量大小，减少上报频率
-        flushInterval: 30000, // 增加上报间隔到30秒
+        batchSize: 10, // 批量大小，现在使用Perfume.js进行资源监控
+        flushInterval: 30000, // 上报间隔30秒
         enableConsole: true,
         userId: 'demo-user-123',
         sessionId: 'demo-session-456',
         extra: {
           appVersion: '1.0.0',
-          platform: 'web-demo',
+          platform: 'web-demo-perfume',
         },
       });
 
-      // 安装插件
+      // 安装插件 - 现在ResourcePlugin使用Perfume.js进行资源监控
       tracker
         .use(new LX.JSErrorPlugin())
         .use(new LX.APIPlugin())
-        .use(new LX.ResourcePlugin());
+        .use(new LX.ResourcePlugin()); // 集成了Perfume.js的资源监控
 
       // 重写console方法以显示在页面上
       const consoleDiv = document.getElementById('console');
