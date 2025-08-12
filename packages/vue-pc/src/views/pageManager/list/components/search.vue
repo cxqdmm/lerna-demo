@@ -45,6 +45,7 @@
             placeholder="请输入"
             allow-clear
             style="width: 200px"
+            @change="handleFactoryNameChange"
           />
         </a-form-item>
 
@@ -185,8 +186,20 @@
   };
 
   // 处理商品名称选择
-  const handleProductNameSelect = (value: string) => {
+  const handleProductNameSelect = (value: string, option: any) => {
     searchParams.value.productName = value;
+    // 如果选中的option有code属性，更新到方案编码字段
+    if (option && option.code) {
+      searchParams.value.factoryName = option.code;
+    }
+  };
+
+  // 处理方案编码变化
+  const handleFactoryNameChange = () => {
+    // 修改方案编码时清空商品名称
+    searchParams.value.productName = '';
+    // 同时清空商品名称建议列表
+    productNameSuggestions.value = [];
   };
 
   // 新建
