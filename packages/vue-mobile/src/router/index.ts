@@ -67,6 +67,21 @@ const routes = [
     name: 'ModularCraft',
     component: () => import('@/views/ModularCraft/page.vue'),
   },
+  {
+    path: '/mobile-table',
+    name: 'MobileTable',
+    component: () => import('@/views/MobileTableDemo.vue'),
+  },
+  {
+    path: '/uploader-demo',
+    name: 'UploaderDemo',
+    component: () => import('@/views/CustomUploaderDemo.vue'),
+  },
+  {
+    path: '/uploader-demo2',
+    name: 'UploaderDemo2',
+    component: () => import('@/views/FieldUploaderDemo.vue'),
+  },
 ];
 
 const router = createRouter({

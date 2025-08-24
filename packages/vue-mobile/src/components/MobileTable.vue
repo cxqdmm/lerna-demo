@@ -137,36 +137,36 @@
   }
 
   /* 覆盖vxe-table默认样式 */
-  :deep(.vxe-table) {
-    border: 1px solid #e8e8e8;
-    border-radius: 6px;
-  }
+  // :deep(.vxe-table) {
+  //   border: 1px solid #e8e8e8;
+  //   border-radius: 6px;
+  // }
 
-  :deep(.vxe-header--column) {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    font-weight: 600;
-    color: #ffffff !important;
-    padding: 12px 8px;
-    font-size: 14px;
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
-  }
+  // :deep(.vxe-header--column) {
+  //   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  //   font-weight: 600;
+  //   color: #ffffff !important;
+  //   padding: 12px 8px;
+  //   font-size: 14px;
+  //   border-right: 1px solid rgba(255, 255, 255, 0.2);
+  // }
 
-  :deep(.vxe-body--column) {
-    padding: 12px 8px;
-    color: #595959;
-    font-size: 14px;
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  // :deep(.vxe-body--column) {
+  //   padding: 12px 8px;
+  //   color: #595959;
+  //   font-size: 14px;
+  //   text-align: center;
+  //   white-space: nowrap;
+  //   overflow: hidden;
+  //   text-overflow: ellipsis;
+  // }
 
-  :deep(.vxe-table .vxe-header--row .vxe-header--column) {
-    padding: 4px 8px;
-  }
+  // :deep(.vxe-table .vxe-header--row .vxe-header--column) {
+  //   padding: 4px 8px;
+  // }
 
-  :deep(.vxe-table .vxe-header--row .vxe-header--column .vxe-cell) {
-    min-height: 20px !important;
-    height: 30px !important;
-  }
+  // :deep(.vxe-table .vxe-header--row .vxe-header--column .vxe-cell) {
+  //   min-height: 20px !important;
+  //   height: 30px !important;
+  // }
 </style>
