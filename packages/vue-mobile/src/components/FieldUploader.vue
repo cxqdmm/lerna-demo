@@ -39,6 +39,8 @@
         v-for="(file, index) in fileList"
         :key="index"
         class="file-preview-item"
+        :class="{ 'failed-item': file.status === 'failed' }"
+        @click="file.status === 'failed' ? handleRetryUpload(file, index) : null"
       >
         <!-- 文件类型图标 -->
         <div class="file-type-icon">
@@ -177,6 +179,40 @@
       newFileList.splice(index, 1);
       emit('update:modelValue', newFileList);
     }
+  };
+
+  // 重新上传失败的文件
+  const handleRetryUpload = (file: FileItem, index: number) => {
+    // 重置文件状态
+    const newFileList = [...fileList.value];
+    newFileList[index] = {
+      ...file,
+      status: 'uploading',
+      progress: 0
+    };
+    emit('update:modelValue', newFileList);
+    
+    // 模拟重新上传过程
+    const uploadInterval = setInterval(() => {
+      const currentFileList = [...(attrs.modelValue as FileItem[])];
+      const currentFile = currentFileList[index];
+      
+      if (currentFile && currentFile.status === 'uploading') {
+        currentFile.progress = (currentFile.progress || 0) + 10;
+        
+        if (currentFile.progress >= 100) {
+          clearInterval(uploadInterval);
+          // 随机决定成功或失败（演示用）
+          const isSuccess = Math.random() > 0.3; // 70%成功率
+          currentFile.status = isSuccess ? 'done' : 'failed';
+          currentFile.progress = isSuccess ? 100 : 0;
+        }
+        
+        emit('update:modelValue', currentFileList);
+      } else {
+        clearInterval(uploadInterval);
+      }
+    }, 200);
   };
 
   // 创建Proxy实例，让父组件ref.value直接访问到van-uploader实例

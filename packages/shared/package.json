@@ -4,7 +4,34 @@
     "main": "index.ts",
     "module": "index.ts",
     "types": "index.ts",
-    "files": ["index.ts", "hooks","performance","tools"],
+    "files": [
+      "index.ts",
+      "components",
+      "composables",
+      "h5-components",
+      "h5-field",
+      "modular-craft",
+      "performance",
+      "planBookComponents",
+      "tools",
+      "types"
+    ],
+    "exports": {
+      ".": {
+        "import": "./index.ts",
+        "types": "./index.ts"
+      },
+      "./*": "./*",
+      "./components/*": "./components/*",
+      "./composables/*": "./composables/*",
+      "./h5-components/*": "./h5-components/*",
+      "./h5-field/*": "./h5-field/*",
+      "./modular-craft/*": "./modular-craft/*",
+      "./performance/*": "./performance/*",
+      "./planBookComponents/*": "./planBookComponents/*",
+      "./tools/*": "./tools/*",
+      "./types/*": "./types/*"
+    },
     "scripts": {
       "build": "vite build",
       "dev": "vite build --watch"

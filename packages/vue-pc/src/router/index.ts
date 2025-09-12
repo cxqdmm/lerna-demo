@@ -56,6 +56,16 @@ const routes = [
     name: 'TemplateReview',
     component: () => import('@/views/pageManager/templateReview/page.vue'),
   },
+  {
+    path: '/order-list',
+    name: 'OrderList',
+    component: () => import('@/views/order-list/index.vue'),
+  },
+  {
+    path: '/order-detail',
+    name: 'OrderDetail',
+    component: () => import('@/views/order-detail/index.vue'),
+  },
 ];
 
 const router = createRouter({

@@ -11,6 +11,7 @@ import { createHtmlPlugin } from 'vite-plugin-html';
 import { readFileSync } from 'fs';
 import postcssPxToRem from 'postcss-pxtorem';
 import { lazyImport, VxeResolver } from 'vite-plugin-lazy-import';
+import tailwindcss from '@tailwindcss/postcss';
 
 export const createViteConfig = (packageName: string, isH5?: boolean) => {
   const packagePath = resolve(__dirname, `packages/${packageName}`);
@@ -21,6 +22,7 @@ export const createViteConfig = (packageName: string, isH5?: boolean) => {
   );
 
   const cssPlugins: any[] = [
+    tailwindcss,
     autoprefixer({
       overrideBrowserslist: [
         '> 0.5%',
@@ -98,6 +100,7 @@ export const createViteConfig = (packageName: string, isH5?: boolean) => {
     resolve: {
       alias: {
         '@': resolve(__dirname, `packages/${packageName}/src`),
+        '@giom/shared': resolve(__dirname, 'packages/shared'),
       },
     },
     build: {
