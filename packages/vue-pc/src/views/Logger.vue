@@ -140,7 +140,7 @@
           <a-timeline-item
             v-for="(n, i) in chain.nodes"
             :key="n.id"
-            :color="colorOf(n.category)"
+            :color="severityColor(n.severity)"
           >
             <div
               class="log-row"
@@ -235,37 +235,6 @@
     >
       粘贴日志后点击“解析日志”，即可在此看到链路。
     </div>
-
-    <a-drawer
-      :open="activeDrawerOpen"
-      :width="360"
-      title="错误日志"
-      @close="closeDrawer"
-    >
-      <div v-if="activeChainErrors.length">
-        <div
-          v-for="e in activeChainErrors"
-          :key="e.id"
-          class="err-item"
-        >
-          <div class="err-title">{{ e.title }} · {{ e.timeText }}</div>
-          <div class="err-desc">{{ e.desc }}</div>
-          <div
-            v-if="e.endpoint"
-            class="err-endpoint"
-          >
-            {{ e.endpoint }}
-          </div>
-          <div
-            v-if="e.statusCode != null"
-            class="err-status"
-          >
-            状态 {{ e.statusCode }}
-          </div>
-        </div>
-      </div>
-      <div v-else>无错误</div>
-    </a-drawer>
   </div>
 </template>
 
@@ -310,8 +279,6 @@
   const parsed = ref<RawLog[]>([]);
   const groupByRoute = ref(true);
   const onlyErrors = ref(false);
-  const activeDrawerOpen = ref(false);
-  const activeChainIndex = ref<number | null>(null);
   const activeNodeId = ref<number | null>(null);
   function nodeDomId(id: number) {
     return `log-node-${id}`;
@@ -322,20 +289,9 @@
   }
   function onMiniSelect(payload: { id: number; chainIndex: number }) {
     activeNodeId.value = payload.id;
-    activeChainIndex.value = payload.chainIndex;
     toggleExpand(payload.id);
     scrollToNode(payload.id);
-    activeDrawerOpen.value = true;
   }
-  function closeDrawer() {
-    activeDrawerOpen.value = false;
-  }
-  const activeChainErrors = computed(() => {
-    if (activeChainIndex.value == null) return [];
-    const chain = chains.value[activeChainIndex.value];
-    if (!chain) return [];
-    return chain.nodes.filter((n) => n.severity === 'error');
-  });
 
   function createMockLogs(): RawLog[] {
     const arr: RawLog[] = [];
@@ -714,16 +670,7 @@
 
   function logtypeColor(l: string, active: boolean) {
     if (!active) return 'default';
-    switch (l) {
-      case 'info':
-        return 'blue';
-      case 'warn':
-        return 'gold';
-      case 'error':
-        return 'red';
-      default:
-        return 'default';
-    }
+    return l === 'error' ? 'red' : 'blue';
   }
 
   // 统计计数（基于解析后的标准化节点）
@@ -780,20 +727,11 @@
   }
 
   function colorOf(cat: string) {
-    switch (cat) {
-      case 'click':
-        return 'green';
-      case 'route':
-        return 'blue';
-      case 'event':
-        return 'purple';
-      case 'js':
-        return 'gold';
-      case 'api':
-        return 'orange';
-      default:
-        return 'gray';
-    }
+    return 'blue';
+  }
+
+  function severityColor(sev: string) {
+    return sev === 'error' ? 'red' : 'blue';
   }
 
   function formatJson(obj: any) {
@@ -1052,24 +990,11 @@
     color: #444;
     margin: 2px 0;
   }
-  .err-item {
-    border-bottom: 1px solid #f0f0f0;
-    padding: 8px 0;
-  }
-  .err-title {
-    font-weight: 600;
-    color: #333;
-  }
-  .err-desc,
-  .err-endpoint,
-  .err-status {
-    color: #666;
-    font-size: 12px;
-  }
   .minimap-sticky {
     position: sticky;
     top: 0;
     z-index: 100;
     background: #fff;
+    overflow: hidden;
   }
 </style>

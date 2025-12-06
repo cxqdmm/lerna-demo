@@ -28,20 +28,35 @@
       @mousemove="onMove"
       @mouseup="onUp"
     >
+      <defs>
+        <marker
+          id="axis-arrow"
+          markerWidth="6"
+          markerHeight="6"
+          refX="5"
+          refY="3"
+          orient="auto"
+        >
+          <path
+            d="M0,0 L6,3 L0,6 Z"
+            fill="#cfd8ea"
+          />
+        </marker>
+      </defs>
       <g
         v-for="(c, ci) in chains"
         :key="ci"
-        :transform="`translate(0, ${ci * rowH + 12})`"
+        :transform="`translate(0, ${ci * rowH + 16})`"
       >
-        <rect
-          x="0"
-          y="-10"
-          width="1000"
-          height="20"
-          rx="8"
-          fill="none"
-          stroke="#eef1f6"
+        <line
+          :x1="firstX(c)"
+          y1="0"
+          x2="1000"
+          y2="0"
+          stroke="#cfd8ea"
+          stroke-width="1"
           style="pointer-events: none"
+          marker-end="url(#axis-arrow)"
         />
         <rect
           v-for="n in c.nodes"
@@ -50,8 +65,8 @@
           y="-8"
           :width="widthOf(n)"
           height="16"
-          :fill="catColor(n.category)"
-          :stroke="sevStroke(n.severity)"
+          :fill="fillColor(n.severity)"
+          :stroke="strokeColor(n.severity)"
           stroke-width="1"
           style="cursor: pointer"
           @click="onSelect(n.id, ci)"
@@ -60,18 +75,29 @@
             {{ timeText(n.timeMs) }} · {{ n.category }} · {{ n.severity }}
           </title>
         </rect>
+        <text
+          v-for="n in c.nodes"
+          :key="'cat-' + n.id"
+          :x="xOf(n.timeMs)"
+          y="-12"
+          font-size="8"
+          fill="#333"
+          text-anchor="middle"
+        >
+          {{ categoryLetter(n.category) }}
+        </text>
         <template
           v-for="bl in bottomLabels[ci]"
           :key="'bl-' + bl.id"
         >
           <text
             :x="bl.x"
-            y="26"
+            y="10"
             font-size="8"
             fill="#333"
             text-anchor="start"
             dominant-baseline="hanging"
-            :transform="`rotate(45 ${bl.x} 26)`"
+            :transform="`rotate(65 ${bl.x} 10)`"
           >
             {{ bl.text }}
           </text>
@@ -99,7 +125,7 @@
     (e: 'select-node', payload: { id: number; chainIndex: number }): void;
   }>();
 
-  const rowH = 28;
+  const rowH = 36;
   const viewStart = ref(0);
   const viewEnd = ref(1);
   const fullSpan = computed(() => Math.max(1, maxT.value - minT.value));
@@ -133,33 +159,11 @@
   }
   const height = computed(() => props.chains.length * rowH + 72);
 
-  function catColor(c: string) {
-    switch (c) {
-      case 'click':
-        return '#52c41a';
-      case 'route':
-        return '#1677ff';
-      case 'event':
-        return '#722ed1';
-      case 'js':
-        return '#faad14';
-      case 'api':
-        return '#fa8c16';
-      default:
-        return '#999999';
-    }
+  function fillColor(sev: string) {
+    return sev === 'error' ? '#ff4d4f' : '#1677ff';
   }
-  function sevStroke(s: string) {
-    switch (s) {
-      case 'error':
-        return '#ff4d4f';
-      case 'warn':
-        return '#faad14';
-      case 'info':
-        return '#1677ff';
-      default:
-        return '#d9d9d9';
-    }
+  function strokeColor(sev: string) {
+    return sev === 'error' ? '#ff4d4f' : '#1677ff';
   }
   function timeText(ms: number) {
     const d = new Date(ms);
@@ -170,13 +174,28 @@
     const h = String(d.getHours()).padStart(2, '0');
     const m = String(d.getMinutes()).padStart(2, '0');
     const s = String(d.getSeconds()).padStart(2, '0');
-    const u = String(ms % 1000).padStart(3, '0');
-    return `${h}:${m}:${s}.${u}`;
+    return `${h}:${m}:${s}`;
   }
   function frameLabel(n: NodeItemLite) {
     const d = new Date(n.timeMs);
     const date = d.toLocaleDateString();
     return `${date} ${timeShort(n.timeMs)}`;
+  }
+  function categoryLetter(c: string) {
+    switch (c) {
+      case 'js':
+        return 'J';
+      case 'api':
+        return 'A';
+      case 'route':
+        return 'R';
+      case 'click':
+        return 'C';
+      case 'event':
+        return 'E';
+      default:
+        return (c && c[0] ? c[0] : '?').toUpperCase();
+    }
   }
 
   const bottomLabels = computed(() => {
@@ -194,10 +213,12 @@
     });
   });
   function widthOf(n: NodeItemLite) {
-    const baseMs = 50;
-    const ms = (n as any).duration ?? baseMs;
-    const px = (ms / viewSpan.value) * 1000;
-    return Math.max(3, Math.min(20, px));
+    return 8;
+  }
+  function firstX(c: ChainItemLite) {
+    if (!c || !c.nodes || !c.nodes.length) return 0;
+    const minMs = Math.min(...c.nodes.map((n) => n.timeMs));
+    return xOf(minMs);
   }
   function onSelect(id: number, chainIndex: number) {
     emit('select-node', { id, chainIndex });
@@ -310,7 +331,7 @@
 
 <style scoped>
   .minimap {
-    padding: 12px 16px 48px;
+    padding: 12px 16px 12px;
     background: #ffffff;
     border: 1px solid #eef1f6;
     border-radius: 12px;
