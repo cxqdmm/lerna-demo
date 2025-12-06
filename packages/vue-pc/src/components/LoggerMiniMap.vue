@@ -21,9 +21,10 @@
     </div>
     <svg
       ref="svgRef"
-      :viewBox="`0 0 1000 ${height}`"
+      :viewBox="`0 0 ${viewBoxWidth} ${height}`"
       preserveAspectRatio="none"
       class="svg"
+      :style="{ width: viewBoxWidth + 'px' }"
       @mousedown="onDown"
       @mousemove="onMove"
       @mouseup="onUp"
@@ -49,9 +50,9 @@
         :transform="`translate(0, ${ci * rowH + 16})`"
       >
         <line
-          :x1="firstX(c)"
+          :x1="firstCenter(ci)"
           y1="0"
-          x2="1000"
+          :x2="viewBoxWidth"
           y2="0"
           stroke="#cfd8ea"
           stroke-width="1"
@@ -59,9 +60,9 @@
           marker-end="url(#axis-arrow)"
         />
         <rect
-          v-for="n in c.nodes"
+          v-for="(n, ni) in c.nodes"
           :key="n.id"
-          :x="xOf(n.timeMs) - widthOf(n) / 2"
+          :x="layoutXs[ci][ni] - widthOf(n) / 2"
           y="-8"
           :width="widthOf(n)"
           height="16"
@@ -76,9 +77,9 @@
           </title>
         </rect>
         <text
-          v-for="n in c.nodes"
+          v-for="(n, ni) in c.nodes"
           :key="'cat-' + n.id"
-          :x="xOf(n.timeMs)"
+          :x="layoutXs[ci][ni]"
           y="-12"
           font-size="8"
           fill="#333"
@@ -198,27 +199,41 @@
     }
   }
 
+  const minGapPx = 6;
+  const layoutXs = computed(() => {
+    return props.chains.map((c) => {
+      let lastCenter = -Infinity;
+      return c.nodes.map((n) => {
+        const desired = xOf(n.timeMs);
+        const center = Math.max(desired, lastCenter + widthOf(n) + minGapPx);
+        lastCenter = center;
+        return center;
+      });
+    });
+  });
+  const viewBoxWidth = computed(() => {
+    const margin = 40;
+    const maxRight = layoutXs.value.reduce((acc, xs) => {
+      const last = xs.length ? xs[xs.length - 1] : 0;
+      return Math.max(acc, last + margin);
+    }, 1000);
+    return Math.max(1000, Math.round(maxRight));
+  });
   const bottomLabels = computed(() => {
     return props.chains.map((c, ci) => {
-      const res: { id: number; x: number; text: string }[] = [];
-      let lastX = -Infinity;
-      const nodes = [...c.nodes].sort((a, b) => a.timeMs - b.timeMs);
-      nodes.forEach((n) => {
-        const x = xOf(n.timeMs);
-        const text = frameLabel(n);
-        res.push({ id: n.id, x, text });
-        lastX = x;
-      });
-      return res;
+      return c.nodes.map((n, ni) => ({
+        id: n.id,
+        x: layoutXs.value[ci][ni],
+        text: frameLabel(n),
+      }));
     });
   });
   function widthOf(n: NodeItemLite) {
     return 8;
   }
-  function firstX(c: ChainItemLite) {
-    if (!c || !c.nodes || !c.nodes.length) return 0;
-    const minMs = Math.min(...c.nodes.map((n) => n.timeMs));
-    return xOf(minMs);
+  function firstCenter(chainIndex: number) {
+    const xs = layoutXs.value[chainIndex];
+    return xs && xs.length ? xs[0] : 0;
   }
   function onSelect(id: number, chainIndex: number) {
     emit('select-node', { id, chainIndex });
@@ -331,11 +346,12 @@
 
 <style scoped>
   .minimap {
-    padding: 12px 16px 12px;
+    padding: 12px 16px 0px;
     background: #ffffff;
     border: 1px solid #eef1f6;
     border-radius: 12px;
-    overflow: visible;
+    overflow-x: auto;
+    overflow-y: visible;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
   }
   .toolbar {

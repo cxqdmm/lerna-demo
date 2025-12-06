@@ -295,158 +295,57 @@
 
   function createMockLogs(): RawLog[] {
     const arr: RawLog[] = [];
-    let ts = Date.now() - 60000;
-    function add(o: any) {
-      arr.push({ message: JSON.stringify(o) });
-    }
     const app = 'https://app.local';
-    const api = 'https://api.local';
-
-    add({
-      ts: (ts += 0),
-      category: 'route',
-      data: { from: '/home', to: '/list' },
-      context: { url: app + '/list' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 200),
-      category: 'click',
-      data: { target: 'Filter Button' },
-      context: { url: app + '/list' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 500),
-      category: 'api',
-      data: {
-        method: 'GET',
-        endpoint: '/api/list',
-        status: 200,
-        duration: 180,
-      },
-      context: { url: api + '/api/list' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 300),
-      category: 'js',
-      data: { message: 'TypeError: Cannot read property length of undefined' },
-      context: { url: app + '/list' },
-      log_type: 'error',
-    });
-    add({
-      ts: (ts += 400),
-      category: 'api',
-      data: {
-        method: 'GET',
-        endpoint: '/api/list',
-        status: 500,
-        duration: 220,
-      },
-      context: { url: api + '/api/list' },
-      log_type: 'error',
-    });
-
-    add({
-      ts: (ts += 1500),
-      category: 'route',
-      data: { from: '/list', to: '/detail' },
-      context: { url: app + '/detail' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 200),
-      category: 'click',
-      data: { target: 'ItemCard' },
-      context: { url: app + '/detail' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 500),
-      category: 'api',
-      data: {
-        method: 'GET',
-        endpoint: '/api/detail',
-        status: 200,
-        duration: 140,
-      },
-      context: { url: api + '/api/detail' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 300),
-      category: 'api',
-      data: {
-        method: 'POST',
-        endpoint: '/api/cart',
-        status: 500,
-        duration: 320,
-      },
-      context: { url: api + '/api/cart' },
-      log_type: 'error',
-    });
-    add({
-      ts: (ts += 200),
-      category: 'js',
-      data: { message: 'ReferenceError: x is not defined' },
-      context: { url: app + '/detail' },
-      log_type: 'error',
-    });
-
-    add({
-      ts: (ts += 2000),
-      category: 'route',
-      data: { from: '/login', to: '/home' },
-      context: { url: app + '/home' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 300),
-      category: 'click',
-      data: { target: 'Submit' },
-      context: { url: app + '/login' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 500),
-      category: 'api',
-      data: {
-        method: 'POST',
-        endpoint: '/api/login',
-        status: 200,
-        duration: 260,
-      },
-      context: { url: api + '/api/login' },
-      log_type: 'info',
-    });
-    add({
-      ts: (ts += 300),
-      category: 'event',
-      data: { message: 'deprecated storage API in use' },
-      context: { url: app + '/home' },
-      log_type: 'warn',
-    });
-    add({
-      ts: (ts += 300),
-      category: 'js',
-      data: { message: 'Unhandled promise rejection' },
-      context: { url: app + '/home' },
-      log_type: 'error',
-    });
-    add({
-      ts: (ts += 400),
-      category: 'api',
-      data: {
-        method: 'GET',
-        endpoint: '/api/home',
-        status: 500,
-        duration: 210,
-      },
-      context: { url: api + '/api/home' },
-      log_type: 'error',
-    });
-
+    const apiHost = 'https://api.local';
+    const base = Date.now() - 60000;
+    const cats = ['api', 'js', 'click', 'event'];
+    for (let i = 0; i < 30; i++) {
+      const ts = base + i * 350;
+      const seg = Math.floor(i / 20);
+      if (i % 20 === 0) {
+        const from = i === 0 ? '/home' : `/page${i - 1}`;
+        const to = `/page${i}`;
+        arr.push({
+          message: JSON.stringify({
+            ts,
+            category: 'route',
+            data: { from, to },
+            context: { url: app + to },
+            log_type: 'info',
+          }),
+        });
+      } else {
+        const cat = cats[i % cats.length];
+        const sev = i % 7 === 0 ? 'error' : 'info';
+        const context = { url: app + `/page${seg}` };
+        let data: any = {};
+        if (cat === 'api') {
+          data = {
+            method: i % 2 ? 'GET' : 'POST',
+            endpoint: `/api/res/${i}`,
+            status: sev === 'error' ? 500 : 200,
+            duration: 100 + (i % 5) * 40,
+          };
+        } else if (cat === 'js') {
+          data = {
+            message: sev === 'error' ? 'ReferenceError: mock' : 'Console log',
+          };
+        } else if (cat === 'click') {
+          data = { target: `Button-${i}` };
+        } else if (cat === 'event') {
+          data = { message: 'scroll' };
+        }
+        arr.push({
+          message: JSON.stringify({
+            ts,
+            category: cat,
+            data,
+            context,
+            log_type: sev,
+          }),
+        });
+      }
+    }
     return arr;
   }
   parsed.value = createMockLogs();
