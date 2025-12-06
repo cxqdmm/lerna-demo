@@ -12,11 +12,6 @@ const routes = [
     component: () => import('@/views/list/List.vue'),
   },
   {
-    path: '/about',
-    name: 'About',
-    component: () => import('@/views/about/About.vue'),
-  },
-  {
     path: '/templatepage',
     name: 'TemplatePage',
     component: () => import('@/views/modules/ModuleConfig.vue'),
@@ -65,6 +60,11 @@ const routes = [
     path: '/order-detail',
     name: 'OrderDetail',
     component: () => import('@/views/order-detail/index.vue'),
+  },
+  {
+    path: '/logger',
+    name: 'logger',
+    component: () => import('@/views/Logger.vue'),
   },
 ];
 
