@@ -104,7 +104,19 @@
       <div class="filter-right">
         <a-switch v-model:checked="groupByRoute" />
         <span class="switch-label">按路由分段</span>
+        <a-switch
+          v-model:checked="onlyErrors"
+          style="margin-left: 8px"
+        />
+        <span class="switch-label">仅错误</span>
       </div>
+    </div>
+
+    <div class="minimap-sticky">
+      <LoggerMiniMap
+        :chains="chains"
+        @select-node="onMiniSelect"
+      />
     </div>
 
     <div
@@ -132,6 +144,7 @@
           >
             <div
               class="log-row"
+              :id="nodeDomId(n.id)"
               :class="[n.status === 'error' ? 'is-error' : '']"
               @click="toggleExpand(n.id)"
             >
@@ -222,11 +235,43 @@
     >
       粘贴日志后点击“解析日志”，即可在此看到链路。
     </div>
+
+    <a-drawer
+      :open="activeDrawerOpen"
+      :width="360"
+      title="错误日志"
+      @close="closeDrawer"
+    >
+      <div v-if="activeChainErrors.length">
+        <div
+          v-for="e in activeChainErrors"
+          :key="e.id"
+          class="err-item"
+        >
+          <div class="err-title">{{ e.title }} · {{ e.timeText }}</div>
+          <div class="err-desc">{{ e.desc }}</div>
+          <div
+            v-if="e.endpoint"
+            class="err-endpoint"
+          >
+            {{ e.endpoint }}
+          </div>
+          <div
+            v-if="e.statusCode != null"
+            class="err-status"
+          >
+            状态 {{ e.statusCode }}
+          </div>
+        </div>
+      </div>
+      <div v-else>无错误</div>
+    </a-drawer>
   </div>
 </template>
 
 <script setup lang="ts">
   import { ref, computed } from 'vue';
+  import LoggerMiniMap from '../components/LoggerMiniMap.vue';
 
   interface RawLog {
     timestamp?: string | number;
@@ -264,6 +309,33 @@
   const raw = ref('');
   const parsed = ref<RawLog[]>([]);
   const groupByRoute = ref(true);
+  const onlyErrors = ref(false);
+  const activeDrawerOpen = ref(false);
+  const activeChainIndex = ref<number | null>(null);
+  const activeNodeId = ref<number | null>(null);
+  function nodeDomId(id: number) {
+    return `log-node-${id}`;
+  }
+  function scrollToNode(id: number) {
+    const el = document.getElementById(nodeDomId(id));
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function onMiniSelect(payload: { id: number; chainIndex: number }) {
+    activeNodeId.value = payload.id;
+    activeChainIndex.value = payload.chainIndex;
+    toggleExpand(payload.id);
+    scrollToNode(payload.id);
+    activeDrawerOpen.value = true;
+  }
+  function closeDrawer() {
+    activeDrawerOpen.value = false;
+  }
+  const activeChainErrors = computed(() => {
+    if (activeChainIndex.value == null) return [];
+    const chain = chains.value[activeChainIndex.value];
+    if (!chain) return [];
+    return chain.nodes.filter((n) => n.severity === 'error');
+  });
 
   function createMockLogs(): RawLog[] {
     const arr: RawLog[] = [];
@@ -678,11 +750,12 @@
   }
 
   function filterNodes(nodes: NodeItem[]): NodeItem[] {
-    return nodes.filter(
-      (n) =>
-        selectedCategories.value.includes(n.category) &&
-        selectedLogtypes.value.includes(n.severity)
-    );
+    return nodes.filter((n) => {
+      if (!selectedCategories.value.includes(n.category)) return false;
+      if (!selectedLogtypes.value.includes(n.severity)) return false;
+      if (onlyErrors.value && n.severity !== 'error') return false;
+      return true;
+    });
   }
 
   // 先过滤再构建链路
@@ -978,5 +1051,25 @@
   .detail-line {
     color: #444;
     margin: 2px 0;
+  }
+  .err-item {
+    border-bottom: 1px solid #f0f0f0;
+    padding: 8px 0;
+  }
+  .err-title {
+    font-weight: 600;
+    color: #333;
+  }
+  .err-desc,
+  .err-endpoint,
+  .err-status {
+    color: #666;
+    font-size: 12px;
+  }
+  .minimap-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
   }
 </style>
