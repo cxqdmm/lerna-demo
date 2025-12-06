@@ -265,32 +265,163 @@
   const parsed = ref<RawLog[]>([]);
   const groupByRoute = ref(true);
 
-  const now = Date.now();
-  parsed.value = [
-    {
-      message: JSON.stringify({
-        ts: now - 2000,
-        category: 'route',
-        data: { from: '/home', to: '/detail' },
-        context: { url: 'https://app.local/detail' },
-        log_type: 'info',
-      }),
-    },
-    {
-      message: JSON.stringify({
-        ts: now - 1500,
-        category: 'api',
-        data: {
-          method: 'GET',
-          endpoint: '/api/items',
-          status: 500,
-          duration: 240,
-        },
-        context: { url: 'https://api.local/api/items' },
-        log_type: 'error',
-      }),
-    },
-  ];
+  function createMockLogs(): RawLog[] {
+    const arr: RawLog[] = [];
+    let ts = Date.now() - 60000;
+    function add(o: any) {
+      arr.push({ message: JSON.stringify(o) });
+    }
+    const app = 'https://app.local';
+    const api = 'https://api.local';
+
+    add({
+      ts: (ts += 0),
+      category: 'route',
+      data: { from: '/home', to: '/list' },
+      context: { url: app + '/list' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 200),
+      category: 'click',
+      data: { target: 'Filter Button' },
+      context: { url: app + '/list' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 500),
+      category: 'api',
+      data: {
+        method: 'GET',
+        endpoint: '/api/list',
+        status: 200,
+        duration: 180,
+      },
+      context: { url: api + '/api/list' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 300),
+      category: 'js',
+      data: { message: 'TypeError: Cannot read property length of undefined' },
+      context: { url: app + '/list' },
+      log_type: 'error',
+    });
+    add({
+      ts: (ts += 400),
+      category: 'api',
+      data: {
+        method: 'GET',
+        endpoint: '/api/list',
+        status: 500,
+        duration: 220,
+      },
+      context: { url: api + '/api/list' },
+      log_type: 'error',
+    });
+
+    add({
+      ts: (ts += 1500),
+      category: 'route',
+      data: { from: '/list', to: '/detail' },
+      context: { url: app + '/detail' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 200),
+      category: 'click',
+      data: { target: 'ItemCard' },
+      context: { url: app + '/detail' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 500),
+      category: 'api',
+      data: {
+        method: 'GET',
+        endpoint: '/api/detail',
+        status: 200,
+        duration: 140,
+      },
+      context: { url: api + '/api/detail' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 300),
+      category: 'api',
+      data: {
+        method: 'POST',
+        endpoint: '/api/cart',
+        status: 500,
+        duration: 320,
+      },
+      context: { url: api + '/api/cart' },
+      log_type: 'error',
+    });
+    add({
+      ts: (ts += 200),
+      category: 'js',
+      data: { message: 'ReferenceError: x is not defined' },
+      context: { url: app + '/detail' },
+      log_type: 'error',
+    });
+
+    add({
+      ts: (ts += 2000),
+      category: 'route',
+      data: { from: '/login', to: '/home' },
+      context: { url: app + '/home' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 300),
+      category: 'click',
+      data: { target: 'Submit' },
+      context: { url: app + '/login' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 500),
+      category: 'api',
+      data: {
+        method: 'POST',
+        endpoint: '/api/login',
+        status: 200,
+        duration: 260,
+      },
+      context: { url: api + '/api/login' },
+      log_type: 'info',
+    });
+    add({
+      ts: (ts += 300),
+      category: 'event',
+      data: { message: 'deprecated storage API in use' },
+      context: { url: app + '/home' },
+      log_type: 'warn',
+    });
+    add({
+      ts: (ts += 300),
+      category: 'js',
+      data: { message: 'Unhandled promise rejection' },
+      context: { url: app + '/home' },
+      log_type: 'error',
+    });
+    add({
+      ts: (ts += 400),
+      category: 'api',
+      data: {
+        method: 'GET',
+        endpoint: '/api/home',
+        status: 500,
+        duration: 210,
+      },
+      context: { url: api + '/api/home' },
+      log_type: 'error',
+    });
+
+    return arr;
+  }
+  parsed.value = createMockLogs();
 
   function parseMaybeJson(str?: string) {
     if (!str) return null;
@@ -298,21 +429,6 @@
       return JSON.parse(str);
     } catch {
       return null;
-    }
-  }
-
-  function mapCategory(cat?: string): string {
-    switch (cat) {
-      case 'network':
-        return 'api';
-      case 'error':
-        return 'js';
-      case 'resource':
-      case 'console':
-      case 'warn':
-        return 'event';
-      default:
-        return cat || 'event';
     }
   }
 
@@ -392,7 +508,7 @@
       const timeText = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
 
       const rawCat = msgObj.category;
-      const category = mapCategory(rawCat);
+      const category = rawCat || 'event';
       const context = msgObj.context || {};
       const data = msgObj.data || {};
       const url = context.url;
