@@ -165,6 +165,11 @@
     } finally {
       searchLoading.value = false;
     }
+    list.descs.map(i => {
+      if (i.label === '商品名称') {
+        i.category = '商品';
+      }
+    })
   };
 
   // 使用lodash-es的debounce创建防抖搜索函数

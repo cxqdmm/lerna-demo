@@ -159,6 +159,10 @@
 
   // 分页大小变化
   const handleSizeChange = (size: number) => {
+    if (size > 20) {
+      message.warning('分页大小不能超过20条');
+      return;
+    }
     handlePageChange(pagination.value.current, size);
   };
 
@@ -173,7 +177,7 @@
     router.push({
       name: 'PageConfig',
       query: {
-        id: record.id,
+        id: record.id.name,
         mode: 'view'
       }
     });
