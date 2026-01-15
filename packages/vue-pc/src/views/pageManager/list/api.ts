@@ -1,7 +1,26 @@
-import httpInstance from '@/api';
+// 类型定义
+export interface OptionItem {
+  label: string;
+  value: string;
+}
+export interface ListDataResponseItem {
+  id: string;
+  productName: string;
+  officialFactoryName: string;
+  officialFactoryCode: string;
+  testDate: string;
+  templateCode: string;
+  createTime: string;
+  status: 'initial' | 'processing' | 'completed' | 'failed' | 'published';
+  statusText: string;
+}
+export interface ListDataResponse {
+  list: ListDataResponseItem[];
+  total: number;
+}
 
 // 获取状态选项
-export function getStatusOptions(params?: any): Promise<any> {
+export function getStatusOptions(): Promise<OptionItem[]> {
   // 模拟API调用，返回mock数据
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -17,7 +36,7 @@ export function getStatusOptions(params?: any): Promise<any> {
 }
 
 // 获取版本编号选项
-export function getVersionOptions(params?: any): Promise<any> {
+export function getVersionOptions(): Promise<OptionItem[]> {
   // 模拟API调用，返回mock数据
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -33,8 +52,7 @@ export function getVersionOptions(params?: any): Promise<any> {
 }
 
 // 获取商品名称建议
-export function getProductNameSuggestions(query: string): Promise<any> {
-  console.log('获取商品名称建议');
+export function getProductNameSuggestions(query: string): Promise<OptionItem[]> {
   // 模拟API调用，返回mock数据
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -77,13 +95,13 @@ export function getProductNameSuggestions(query: string): Promise<any> {
         { label: '个人健康险', value: '个人健康险', category: '健康保险' },
         { label: '团体意外险', value: '团体意外险', category: '意外保险' },
         { label: '财产保险产品', value: '财产保险产品', category: '财产保险' },
-      ]);
+      ] as unknown as OptionItem[]);
     }, 1000);
   });
 }
 
 // 获取列表数据
-export function getListData(params?: any): Promise<any> {
+export function getListData(params?: any): Promise<ListDataResponse> {
   // 模拟API调用，返回mock数据
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -146,7 +164,7 @@ export function getListData(params?: any): Promise<any> {
           },
         ],
         total: 5,
-      });
+      } as ListDataResponse);
     }, 1000);
   });
 }

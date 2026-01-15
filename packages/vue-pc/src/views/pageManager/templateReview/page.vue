@@ -17,11 +17,12 @@
   import { modules } from './modules';
   import { moduleProcessorMap } from './modules/processor';
   import { useTemplateDataReceiver } from '@/composables/useTemplateDataBridge';
+  import type { IStore } from '@giom/shared/modular-craft/useStore';
 
   // 使用模板数据接收服务
   const { onDataChange } = useTemplateDataReceiver();
 
-  const handleMounted = (store: any) => {
+  const handleMounted = (store: IStore) => {
     onDataChange((data: any) => {
       console.log('Received template data:', data);
 

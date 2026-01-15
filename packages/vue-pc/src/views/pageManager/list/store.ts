@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, reactive } from 'vue';
-import { getStatusOptions, getVersionOptions, getListData } from './api';
+import { getStatusOptions, getVersionOptions, getListData, type OptionItem } from './api';
 
 // 搜索项类型定义
 export interface SearchParams {
@@ -69,11 +69,11 @@ export const usePageManagerListStore = defineStore('pageManagerList', () => {
   // 重置搜索参数
   const resetSearchParams = () => {
     Object.assign(searchParams, {
-      productName: '',
-      factoryName: '',
-      status: '',
-      templateCode: '',
-      createTimeRange: [],
+      productName: undefined,
+      factoryName: undefined,
+      status: undefined,
+      templateCode: undefined,
+      createTimeRange: null,
     });
   };
 

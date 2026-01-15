@@ -1,11 +1,19 @@
-import httpInstance from '@/api/index'
 import dayjs from 'dayjs'
+export interface OptionItem { label: string; value: string }
+export interface TemplateItem { id: string; name: string; description: string }
+export interface PageConfigDetail {
+  salesProduct: string;
+  channelAttribution: string;
+  effectiveDate: any;
+  description: string;
+  selectedTemplate: string;
+}
 
 /**
  * 获取渠道归属列表
  * @returns 渠道归属选项数据
  */
-export const getChannelList = (): Promise<{ label: string; value: string }[]> => {
+export const getChannelList = (): Promise<OptionItem[]> => {
   // Mock数据
   const mockData = [
     { label: '直销渠道', value: 'direct_sales' },
@@ -26,7 +34,7 @@ export const getChannelList = (): Promise<{ label: string; value: string }[]> =>
  * @param channelAttribution 渠道归属
  * @returns 销售商品选项数据
  */
-export const getSalesProductList = (channelAttribution: string): Promise<{ label: string; value: string }[]> => {
+export const getSalesProductList = (channelAttribution: string): Promise<OptionItem[]> => {
   // Mock数据 - 根据不同渠道返回不同的商品
   const productsByChannel: Record<string, { label: string; value: string }[]> = {
     direct_sales: [
@@ -85,7 +93,7 @@ export const getSalesProductList = (channelAttribution: string): Promise<{ label
  * 获取模板列表
  * @returns 模板选项数据
  */
-export const getTemplateList = (): Promise<{ id: string; name: string; description: string }[]> => {
+export const getTemplateList = (): Promise<TemplateItem[]> => {
   // Mock数据
   const mockData = [
     {
@@ -134,13 +142,7 @@ export const getTemplateList = (): Promise<{ id: string; name: string; descripti
  * @param id 配置ID
  * @returns 页面配置详情数据
  */
-export const getPageConfigDetail = (id: string): Promise<{
-  salesProduct: string;
-  channelAttribution: string;
-  effectiveDate: any;
-  description: string;
-  selectedTemplate: string;
-}> => {
+export const getPageConfigDetail = (id: string): Promise<PageConfigDetail> => {
   // Mock数据 - 根据不同ID返回不同的配置
   const mockConfigs: Record<string, any> = {
     '1': {
