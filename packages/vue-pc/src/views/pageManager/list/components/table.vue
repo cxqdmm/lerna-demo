@@ -177,7 +177,7 @@
     router.push({
       name: 'PageConfig',
       query: {
-        id: record.id.name,
+        id: record.id,
         mode: 'view'
       }
     });

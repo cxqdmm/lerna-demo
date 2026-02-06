@@ -138,9 +138,13 @@ function handleModalCancel() {
   editData.value = undefined
 }
 
-function handleView(record: MaterialRecord) {}
+function handleView(record: MaterialRecord) {
+  // TODO: Implement view functionality
+}
 
-function handleCopy(record: MaterialRecord) {}
+function handleCopy(record: MaterialRecord) {
+  // TODO: Implement copy functionality
+}
 
 onMounted(() => {
   fetchData();
