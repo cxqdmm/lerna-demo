@@ -258,10 +258,11 @@
 
   // 组件挂载时初始化
   onMounted(async () => {
+    let id = query.id;
     try {
       // 获取URL参数
       const urlParams = {
-        id: route.query.id as string,
+        id: id as string,
         mode: route.query.mode as string,
         copyFromId: route.query.copyFromId as string,
       };
